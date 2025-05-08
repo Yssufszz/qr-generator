@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" href="img/qrlogo.png" />
     <link rel="stylesheet" href="index.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
 </head>
 <body>
     <div class="container">
@@ -53,7 +54,19 @@
             <input type="range" id="logo-size" min="5" max="30" value="15" step="1">
             <small>Nilai: <span id="logo-size-value">15%</span></small>
         </div>
-        
+
+        <div class="input-group">
+            <label for="dot-style">Gaya Titik QR Code:</label>
+            <select id="dot-style">
+              <option value="square">Kotak</option>
+              <option value="dots">Lingkaran</option>
+              <option value="rounded">Sudut Tumpul</option>
+              <option value="extra-rounded">Sangat Tumpul</option>
+              <option value="classy">Elegan</option>
+              <option value="classy-rounded">Elegan Tumpul</option>
+            </select>
+        </div>
+          
         <div class="row">
             <div class="col">
                 <button class="btn" id="generate-btn">Generate QR Code</button>
@@ -114,29 +127,40 @@
                 alert('Silakan masukkan konten untuk QR code!');
                 return;
             }
-            
-            qrcodeDiv.innerHTML = '';
-            
+
             const size = parseInt(qrSizeSelect.value);
             const color = qrColorInput.value;
-            
-            qrcode = new QRCode(qrcodeDiv, {
-                text: content,
+            const dotStyle = document.getElementById('dot-style').value;
+
+            const qrCode = new QRCodeStyling({
                 width: size,
                 height: size,
-                colorDark: color,
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
+                data: content,
+                image: logoFile ? URL.createObjectURL(logoFile) : undefined,
+                dotsOptions: {
+                color: color,
+                type: dotStyle,
+                },
+                backgroundOptions: {
+                color: "#ffffff",
+                },
+                imageOptions: {
+                crossOrigin: "anonymous",
+                margin: 5,
+                imageSize: parseInt(logoSizeInput.value) / 100,
+                },
             });
-            
-            setTimeout(() => {
-                if (logoFile) {
-                    addLogoToQRCode();
-                }
-                
-                downloadBtn.style.display = 'block';
-            }, 200);
+
+            qrcodeDiv.innerHTML = '';
+            qrCode.append(qrcodeDiv);
+
+            downloadBtn.onclick = () => {
+                qrCode.download({ name: "qrcode", extension: "png" });
+            };
+
+            downloadBtn.style.display = 'block';
         }
+
         
         function addLogoToQRCode() {
             const qrImg = qrcodeDiv.querySelector('img');
