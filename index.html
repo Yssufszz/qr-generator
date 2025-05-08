@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #444;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo-preview {
+            width: 100px;
+            height: 100px;
+            border: 1px dashed #ccc;
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9;
+        }
+        
+        .logo-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            display: none;
+        }
+        
+        .btn {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #3367d6;
+        }
+        
+        .btn-secondary {
+            background-color: #f44242;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #d63030;
+        }
+        
+        .row {
+            display: flex;
+            margin: 0 -10px;
+            flex-wrap: wrap;
+        }
+        
+        .col {
+            flex: 1;
+            padding: 0 10px;
+            min-width: 150px;
+            margin-bottom: 10px;
+        }
+        
+        .qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        #qrcode {
+            margin-top: 20px;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        @media (max-width: 768px) {
+            .options {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .logo-container {
+                flex-direction: column;
+            }
+            
+            .logo-preview {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+        }
+        
+        .download-btn {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .options {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .option-group {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>QR Code Generator</h1>
+        
+        <div class="input-group">
+            <label for="content">URL QR Code:</label>
+            <input type="text" id="content" placeholder="Masukkan URL atau teks untuk QR code" value="https://contoh.com">
+        </div>
+        
+        <div class="options">
+            <div class="option-group">
+                <div class="input-group">
+                    <label for="qr-size">Ukuran QR Code:</label>
+                    <select id="qr-size">
+                        <option value="200">200 x 200</option>
+                        <option value="250" selected>250 x 250</option>
+                        <option value="300">300 x 300</option>
+                        <option value="350">350 x 350</option>
+                    </select>
+                </div>
+            </div>
+            <div class="option-group">
+                <div class="input-group">
+                    <label for="qr-color">Warna QR Code:</label>
+                    <input type="color" id="qr-color" value="#000000">
+                </div>
+            </div>
+        </div>
+        
+        <div class="logo-container">
+            <div class="logo-preview">
+                <img id="logo-preview-img" src="" alt="Logo Preview">
+            </div>
+            <div>
+                <label for="logo">(Opsional) Upload Logo (PNG atau JPG):</label>
+                <input type="file" id="logo" accept="image/*">
+                <small>Rekomendasi: Gunakan logo transparan (PNG) untuk hasil terbaik</small>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label for="logo-size">Ukuran Logo (% dari QR Code):</label>
+            <input type="range" id="logo-size" min="5" max="30" value="15" step="1">
+            <small>Nilai: <span id="logo-size-value">15%</span></small>
+        </div>
+        
+        <div class="row">
+            <div class="col">
+                <button class="btn" id="generate-btn">Generate QR Code</button>
+            </div>
+            <div class="col">
+                <button class="btn btn-secondary" id="reset-btn">Reset</button>
+            </div>
+        </div>
+        
+        <div class="qr-container">
+            <div id="qrcode"></div>
+            <button class="btn download-btn" id="download-btn">Download QR Code</button>
+        </div>
+    </div>
+
+    <script>
+        const contentInput = document.getElementById('content');
+        const qrSizeSelect = document.getElementById('qr-size');
+        const qrColorInput = document.getElementById('qr-color');
+        const logoInput = document.getElementById('logo');
+        const logoPreviewImg = document.getElementById('logo-preview-img');
+        const logoSizeInput = document.getElementById('logo-size');
+        const logoSizeValue = document.getElementById('logo-size-value');
+        const generateBtn = document.getElementById('generate-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const qrcodeDiv = document.getElementById('qrcode');
+        const downloadBtn = document.getElementById('download-btn');
+        
+        let logoFile = null;
+        let qrcode = null;
+        
+        logoInput.addEventListener('change', handleLogoUpload);
+        logoSizeInput.addEventListener('input', updateLogoSizeValue);
+        generateBtn.addEventListener('click', generateQRCode);
+        resetBtn.addEventListener('click', resetForm);
+        downloadBtn.addEventListener('click', downloadQRCode);
+        
+        function handleLogoUpload(e) {
+            const file = e.target.files[0];
+            if (file && file.type.match('image.*')) {
+                logoFile = file;
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    logoPreviewImg.src = event.target.result;
+                    logoPreviewImg.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function updateLogoSizeValue() {
+            logoSizeValue.textContent = logoSizeInput.value + '%';
+        }
+        
+        function generateQRCode() {
+            const content = contentInput.value.trim();
+            if (!content) {
+                alert('Silakan masukkan konten untuk QR code!');
+                return;
+            }
+            
+            qrcodeDiv.innerHTML = '';
+            
+            const size = parseInt(qrSizeSelect.value);
+            const color = qrColorInput.value;
+            
+            qrcode = new QRCode(qrcodeDiv, {
+                text: content,
+                width: size,
+                height: size,
+                colorDark: color,
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            setTimeout(() => {
+                if (logoFile) {
+                    addLogoToQRCode();
+                }
+                
+                downloadBtn.style.display = 'block';
+            }, 200);
+        }
+        
+        function addLogoToQRCode() {
+            const qrImg = qrcodeDiv.querySelector('img');
+            if (!qrImg) return;
+            
+            const size = parseInt(qrSizeSelect.value);
+            const logoSize = size * (parseInt(logoSizeInput.value) / 100);
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = size;
+            canvas.height = size;
+            
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, size, size);
+            
+            const qrImgObj = new Image();
+            qrImgObj.onload = function() {
+                ctx.drawImage(qrImgObj, 0, 0, size, size);
+                
+                const logoImg = new Image();
+                logoImg.onload = function() {
+                    const logoX = (size - logoSize) / 2;
+                    const logoY = (size - logoSize) / 2;
+                    
+                    ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+                    
+                    qrImg.src = canvas.toDataURL('image/png');
+                };
+                logoImg.src = logoPreviewImg.src;
+            };
+            qrImgObj.src = qrImg.src;
+        }
+        
+        function downloadQRCode() {
+            const qrImg = qrcodeDiv.querySelector('img');
+            if (!qrImg) return;
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const size = parseInt(qrSizeSelect.value);
+            const padding = 20; 
+            
+            canvas.width = size + (padding * 2);
+            canvas.height = size + (padding * 2);
+            
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const tempImg = new Image();
+            tempImg.onload = function() {
+                ctx.drawImage(tempImg, padding, padding, size, size);
+                
+                const jpgUrl = canvas.toDataURL('image/jpeg', 1.0);
+                const a = document.createElement('a');
+                a.href = jpgUrl;
+                a.download = 'qrcode-with-logo.jpg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+            tempImg.src = qrImg.src;
+        }
+        
+        function resetForm() {
+            contentInput.value = 'https://example.com';
+            qrSizeSelect.value = '250';
+            qrColorInput.value = '#000000';
+            logoInput.value = '';
+            logoPreviewImg.src = '';
+            logoPreviewImg.style.display = 'none';
+            logoSizeInput.value = '15';
+            updateLogoSizeValue();
+            qrcodeDiv.innerHTML = '';
+            logoFile = null;
+            downloadBtn.style.display = 'none';
+        }
+        
+        updateLogoSizeValue();
+    </script>
+</body>
+</html>
